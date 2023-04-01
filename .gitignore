@@ -1,0 +1,12 @@
+
+*.bak
+
+db/
+
+simulation/modelsim/
+
+*.rpt
+
+*.qpf
+
+*.qws
