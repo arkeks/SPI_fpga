@@ -1,4 +1,4 @@
-module spi_fsm
+module spi_fsm_master
 #(
   parameter F_NUM   = 1,                  // number of frames
             F_SIZE  = 8,                  // frame size (ususally 8 bits)
@@ -33,6 +33,7 @@ always @ (posedge SCLK or posedge rst)
   else
     bit_cnt <= bit_cnt + 1'b1;
 
+//-------------------------------------
 	 
 	 
 // frames counter: increments every 8 transmitted bits
@@ -46,6 +47,7 @@ always @ (posedge SCLK or posedge rst)
   else if (bit_cnt == 'd8)
     f_cnt <= f_cnt + 1'b1;
 
+//-------------------------------------
 
 // states enum
 typedef enum {
@@ -92,6 +94,7 @@ always_comb begin
 	endcase
 end
 
+//-------------------------------------
 		
 // chip select (CS) logic
 always_comb begin
@@ -99,14 +102,16 @@ always_comb begin
     CS = 'b0;
 	 
   else begin
-    if (SCLK)
-	   CS = 'b0;
+    if (SCLK)    // CS goes back to 'b1 only 
+	   CS = 'b0;  // when the last SCLK is 'b0
 	 else
 	   CS = 'b1;
 	end
 end
-	
-// SCLK gated clock logic	
+
+//-------------------------------------
+
+// SCLK gated clock logic
 logic sclk_en, sclk_en_latch;
 assign sclk_en = (state == TRANSMIT);
 

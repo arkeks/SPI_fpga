@@ -30,6 +30,5 @@ always_ff @ (posedge clk_i or posedge rst)
   else if (cnt == 'b0)
     clk_o <= ~clk_o;
 
-//assign clk_o = (cnt == 'b0) ? ~clk_o : clk_o;
 
 endmodule
