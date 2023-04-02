@@ -10,3 +10,9 @@ simulation/modelsim/
 *.qpf
 
 *.qws
+
+incremental_db/compiled_partitions/
+
+incremental_db/
+
+*.done
