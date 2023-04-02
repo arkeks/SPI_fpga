@@ -4,7 +4,8 @@ module master #(
 				FREQ   = 1000, // SCLK frequency
 				F_NUM  = 1,    // number of frames
 				F_SIZE = 8,    // frame size
-				C_SIZE = $clog2(F_SIZE)
+				C_SIZE = $clog2(F_SIZE),
+				FC_SIZE = $clog2(F_NUM)
 				
 )
 (
@@ -24,7 +25,9 @@ module master #(
   // debug
   output logic slow_clk_d,
   output logic [2:0] bit_cnt_d,
-  output logic [1:0] next_state_d, state_d
+  output logic [1:0] next_state_d, state_d,
+  output logic [C_SIZE:0] bit_cnt_fsm,
+  output logic [FC_SIZE:0] f_cnt_fsm
 );
 
 logic slow_clk;
@@ -43,7 +46,7 @@ custom_clk #( .FREQ(FREQ) )
 
 //-------------------------------------
   
-// master instance
+// fsm instance
 spi_fsm_master #(F_NUM, F_SIZE)
   fsm_inst
   (
@@ -57,7 +60,9 @@ spi_fsm_master #(F_NUM, F_SIZE)
   
   // for debug
   .next_state_d(next_state_d),
-  .state_d(state_d)
+  .state_d(state_d),
+  .bit_cnt_fsm(bit_cnt_fsm),
+  .f_cnt_fsm(f_cnt_fsm)
   );
 
 //-------------------------------------
@@ -73,8 +78,8 @@ always_ff @ (posedge SCLK or posedge rst)
 //-------------------------------------
 	 
 // transmit bits from MSB to LSB
-always_ff @ (negedge SCLK or posedge rst)
-    MOSI <= tx_data_i[bit_cnt];
+always_ff @ (negedge SCLK or negedge CS or posedge rst)
+  MOSI <= tx_data_i[bit_cnt];
 
 
 	 
@@ -86,6 +91,8 @@ always_ff @ (posedge SCLK or posedge rst)
     rx_data_o[bit_cnt] <= MISO;
 
 //------------------------------------- 
+
+
 	 
 // for debug
 assign slow_clk_d = slow_clk;

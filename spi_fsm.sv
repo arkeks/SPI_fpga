@@ -15,7 +15,10 @@ module spi_fsm_master
   output logic SCLK,
   
   // for debug
-  output logic [1:0] next_state_d, state_d
+  output logic [1:0] next_state_d, state_d,
+  output logic [C_SIZE - 1:0] bit_cnt_fsm,
+  output logic [F_SIZE - 1:0] f_cnt_fsm
+
 );
 
 logic [C_SIZE - 1:0]  bit_cnt; // transmitted bits counter
@@ -23,7 +26,7 @@ logic [FC_SIZE - 1:0] f_cnt;   // frame counter
 
 
 // bits counter: increments every SCLK and becomes 0 after 8 transmitted bits
-always @ (posedge SCLK or posedge rst)
+always @ (posedge SCLK or posedge rst or posedge CS)
   if (rst)
     bit_cnt <= 'b0;
 	 
@@ -37,14 +40,16 @@ always @ (posedge SCLK or posedge rst)
 	 
 	 
 // frames counter: increments every 8 transmitted bits
-always @ (posedge SCLK or posedge rst)
+always @ (posedge SCLK or posedge rst or posedge CS)
   if (rst)
     f_cnt <= 'b0;
 	 
-  else if (f_cnt == F_NUM)
-    f_cnt <= 'b0;
+  else if (CS) begin
+    if (f_cnt == F_NUM)
+      f_cnt <= 'b0;
+  end
 	 
-  else if (bit_cnt == 'd8)
+  else if ((bit_cnt + 1'b1) == F_SIZE)
     f_cnt <= f_cnt + 1'b1;
 
 //-------------------------------------
@@ -115,7 +120,7 @@ end
 logic sclk_en, sclk_en_latch;
 assign sclk_en = (state == TRANSMIT);
 
-always_comb begin
+always_latch begin
   if (~slow_clk)
     sclk_en_latch = sclk_en;
 end
@@ -126,5 +131,7 @@ assign SCLK = sclk_en_latch ? slow_clk : 'b0;
 //for debug
 assign next_state_d = next_state;
 assign state_d = state;
+assign bit_cnt_fsm = bit_cnt;
+assign f_cnt_fsm = f_cnt;
 
 endmodule
