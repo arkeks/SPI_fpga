@@ -11,18 +11,20 @@ module spi_fsm_master
   input  logic rst,
   input  logic start_i,
   
+  output logic [FC_SIZE - 1:0] f_cnt, // frame counter
   output logic CS,
-  output logic SCLK,
+  output logic SCLK
   
+  /*
   // for debug
+  ,
   output logic [1:0] next_state_d, state_d,
-  output logic [C_SIZE - 1:0] bit_cnt_fsm,
-  output logic [F_SIZE - 1:0] f_cnt_fsm
-
+  output logic [C_SIZE - 1:0] bit_cnt_fsm
+  */
 );
 
 logic [C_SIZE - 1:0]  bit_cnt; // transmitted bits counter
-logic [FC_SIZE - 1:0] f_cnt;   // frame counter
+//logic [FC_SIZE - 1:0] f_cnt;   // frame counter
 
 
 // bits counter: increments every SCLK and becomes 0 after 8 transmitted bits
@@ -30,7 +32,7 @@ always @ (posedge SCLK or posedge rst or posedge CS)
   if (rst)
     bit_cnt <= 'b0;
 	 
-  else if (bit_cnt == F_SIZE)
+  else if (CS)
     bit_cnt <= 'b0;
 	 
   else
@@ -127,11 +129,12 @@ end
 
 assign SCLK = sclk_en_latch ? slow_clk : 'b0;
 
-		
+/*
 //for debug
 assign next_state_d = next_state;
 assign state_d = state;
 assign bit_cnt_fsm = bit_cnt;
-assign f_cnt_fsm = f_cnt;
+//assign f_cnt_fsm = f_cnt;
+*/
 
 endmodule
