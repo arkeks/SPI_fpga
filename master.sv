@@ -5,29 +5,31 @@ module master #(
 				F_NUM  = 1,    // number of frames
 				F_SIZE = 8,    // frame size
 				C_SIZE = $clog2(F_SIZE),
-				FC_SIZE = $clog2(F_NUM)
+				FC_SIZE = $clog2(F_NUM) + 1
 				
 )
 (
-  input  logic                clk,
-  input  logic                rst,
-  input  logic                start_i,
-  input  logic [F_SIZE - 1:0] tx_data_i,
+  input  logic                 clk,
+  input  logic                 rst,
+  input  logic                 start_i,
+  input  logic [F_SIZE - 1:0]  tx_data_i,
   
-  output logic [F_SIZE - 1:0] rx_data_o,
-  //output logic                end_o,
+  output logic [F_SIZE - 1:0]  rx_data_o,
   
-  input  logic                MISO,
-  output logic                CS,
-  output logic                SCLK,
-  output logic                MOSI,
+  input  logic                 MISO,
+  output logic                 CS,
+  output logic                 SCLK,
+  output logic                 MOSI,
+  output logic [FC_SIZE - 1:0] f_cnt
   
   // debug
+  /*
+  ,
   output logic slow_clk_d,
   output logic [2:0] bit_cnt_d,
   output logic [1:0] next_state_d, state_d,
-  output logic [C_SIZE:0] bit_cnt_fsm,
-  output logic [FC_SIZE:0] f_cnt_fsm
+  output logic [C_SIZE:0] bit_cnt_fsm
+  */
 );
 
 logic slow_clk;
@@ -55,14 +57,17 @@ spi_fsm_master #(F_NUM, F_SIZE)
   .rst      ( rst     ),
   .start_i  ( start_i ),
   
+  .f_cnt    ( f_cnt   ),
   .CS       ( CS      ),
-  .SCLK     ( SCLK    ),
+  .SCLK     ( SCLK    )
   
+  /*
   // for debug
+  ,
   .next_state_d(next_state_d),
   .state_d(state_d),
-  .bit_cnt_fsm(bit_cnt_fsm),
-  .f_cnt_fsm(f_cnt_fsm)
+  .bit_cnt_fsm(bit_cnt_fsm)
+  */
   );
 
 //-------------------------------------
@@ -93,10 +98,11 @@ always_ff @ (posedge SCLK or posedge rst)
 //------------------------------------- 
 
 
-	 
+/*
 // for debug
 assign slow_clk_d = slow_clk;
 
 assign bit_cnt_d = bit_cnt;	 
+*/
 
 endmodule
